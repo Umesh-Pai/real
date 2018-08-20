@@ -7,97 +7,62 @@
 <script type="text/javascript">
 
 window.addEventListener('load', onVrViewLoad);
-//var vrView;
+var vrView;
 function onVrViewLoad() {
 
-  var vrView = new VRView.Player('#vrview', {
-	image: 'https://s3-ap-southeast-2.amazonaws.com/vr-media-storage/mono180.png',
-	//image: 'https://s3-ap-southeast-2.amazonaws.com/vr-media-storage/mono360.jpg',
+  vrView = new VRView.Player('#vrview', {
+	//image: 'https://s3-ap-southeast-2.amazonaws.com/vr-media-storage/mono180.png',
+	image: 'https://s3-ap-southeast-2.amazonaws.com/vr-media-storage/mono360.jpg',
 	//image: 'https://s3-ap-southeast-2.amazonaws.com/vr-media-storage/stereo180.png',
 	//image: 'https://s3-ap-southeast-2.amazonaws.com/vr-media-storage/stereo360.jpg',
 	
+	//preview: 'https://s3-ap-southeast-2.amazonaws.com/vr-media-storage/mono360.jpg',
     is_stereo: false,
 	width: "1000",
 	height: "500",
 	is_autopan_off: true
-	//is_vr_off: true
-	//is_debug: true
   });
   
-  vrView.addHotspot('dining-room', {
-	pitch: 30, // In degrees. Up is positive.
-	yaw: 20, // In degrees. To the right is positive.
-	radius: 0.05, // Radius of the circular target in meters.
-	distance: 2 // Distance of target from camera in meters.
-  });
-  
-  vrView.addHotspot('dining-room2', {
-	pitch: 0, // In degrees. Up is positive.
-	yaw: 170, // In degrees. To the right is positive.
-	radius: 0.1, // Radius of the circular target in meters.
-	distance: 1 // Distance of target from camera in meters.
-  });
-  
-  vrView.addHotspot('dining-room3', {
-	pitch: 0, // In degrees. Up is positive.
-	yaw: 0, // In degrees. To the right is positive.
-	radius: 0.1, // Radius of the circular target in meters.
-	distance: 1 // Distance of target from camera in meters.
-  });
-  
-  vrView.addHotspot('dining-room4', {
-	pitch: 0, // In degrees. Up is positive.
-	yaw: -30, // In degrees. To the right is positive.
-	radius: 0.1, // Radius of the circular target in meters.
-	distance: 2 // Distance of target from camera in meters.
-  });
-  
-  vrView.addHotspot('dining-room5', {
-	pitch: 30, // In degrees. Up is positive.
-	yaw: -30, // In degrees. To the right is positive.
-	radius: 0.1, // Radius of the circular target in meters.
-	distance: 1 // Distance of target from camera in meters.
-  });
-  
-  vrView.on('getposition', onGetPosition);
-  
-  vrView.on('click', function(event) {
-     alert("in=" + event.id);
-	 vrView.getPosition()
-	 alert("in2=" + event.id);
-	if (event.id == 'test') {
-		// Handle hotspot click.
-		alert("in");
-	}
-  });
-  
-  //vrView.on('ready', onVRViewReady);
-  //vrView.on('click', onHotspotClick);
-  //vrView.on('getposition', onGetPosition);
+  vrView.on('ready', onVRViewReady);
+  vrView.on('click', onHotspotClick);
   vrView.on('error', onVRViewError);
+}
+
+function onVRViewReady(e) {
+
+	vrView.addHotspot('dining-room', {
+	    pitch: 32, // In degrees. Up is positive.
+		yaw: -35, // In degrees. To the right is positive.
+		radius: 0.05, // Radius of the circular target in meters.
+		distance: 1 // Distance of target from camera in meters.
+  });
+  
+  vrView.addHotspot('living-room', {
+		pitch: 32, // In degrees. Up is positive.
+		yaw: -41, // In degrees. To the right is positive.
+		radius: 0.045, // Radius of the circular target in meters.
+		distance: 1 // Distance of target from camera in meters.
+  });
+  
+    vrView.addHotspot('kitchen', {
+		pitch: 32, // In degrees. Up is positive.
+		yaw: -46, // In degrees. To the right is positive.
+		radius: 0.04, // Radius of the circular target in meters.
+		distance: 1 // Distance of target from camera in meters.
+  });
+}
+
+function onHotspotClick(e) {
+  alert("id="+ e.id);
+  //console.log('onHotspotClick', e.id);
+  if (e.id) {
+    loadScene(e.id);
+  }
 }
 
 function onVRViewError(e) {
   console.log('Error! %s', e.message);
 }
-
-function onVRViewReady(e) {
-	alert("Ready ev=" + e + "  id="+ e.id);
-}
-
-function onHotspotClick(e) {
-  //vrView.getPosition()
-  alert("Click ev=" + e + "  id="+ e.id);
-  //console.log('onHotspotClick', e.id);
-  //if (e.id) {
-    //loadScene(e.id);
-  //}
-}
-
-function onGetPosition(e) {
-	alert("position ev=" + e + "  id="+ e.id);
-}
-
 
 
 </script> 
