@@ -1,0 +1,51 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+
+<script src="https://storage.googleapis.com/vrview/2.0/build/vrview.min.js"></script>
+
+<script type="text/javascript">
+
+window.addEventListener('load', onVrViewLoad);
+var vrView;
+function onVrViewLoad() {
+  // Selector '#vrview' finds element with id 'vrview'.
+  vrView = new VRView.Player('#vrview', {
+  
+  //video: 'https://www.youtube.com/watch?v=-xNN-bJQ4vI',
+  //video: 'https://s3-ap-southeast-2.amazonaws.com/vr-media-storage/Park-Sterio.mp4',
+     video: 'https://s3-ap-southeast-2.amazonaws.com/vr-media-storage/Drone-Mono.mp4',
+	 //video: 'https://s3.ap-southeast-2.amazonaws.com/vr-media-storage/shark.mp4',
+     is_stereo: true
+  });
+}
+
+function playVideo() {
+  //alert("in play");
+  vrView.play();
+}
+
+function pauseVideo() {
+  //alert("in play");
+  vrView.pause();
+}
+
+</script> 
+
+<title>VR Application</title>
+</head>
+<body>
+	Start Video...///
+	
+	<div id='vrview'></div>
+	
+	<div id='interact'>
+	<input type="button" value="play" onclick="playVideo()"/>
+	<input type="button" value="stop" onclick="pauseVideo()"/>
+
+	</div>
+	
+	End
+	
+</body>
+</html>
