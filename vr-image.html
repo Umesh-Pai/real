@@ -5,66 +5,182 @@
 <script src="https://storage.googleapis.com/vrview/2.0/build/vrview.min.js"></script>
 
 <script type="text/javascript">
-
 window.addEventListener('load', onVrViewLoad);
 var vrView;
-function onVrViewLoad() {
+var landingPage = 'landing';
 
+var scenes = {
+   landing: {
+    image: 'https://s3-ap-southeast-2.amazonaws.com/vr-media-storage/mono360.jpg',
+	isStereo: false,
+    hotspots: {
+      livingRoom: {
+        pitch: 32,
+        yaw: -35,
+        radius: 0.05,
+        distance: 1
+      },
+      kitchen: {
+        pitch: 32,
+        yaw: -41,
+        radius: 0.045,
+        distance: 1
+      },
+	  diningRoom: {
+        pitch: 32,
+        yaw: -46,
+        radius: 0.04,
+        distance: 1
+      }
+    }
+  },
+  diningRoom: {
+    image: 'https://s3-ap-southeast-2.amazonaws.com/vr-media-storage/stereo180.png',
+	isStereo: true,
+    hotspots: {
+      livingRoom: {
+        pitch: 32,
+        yaw: -35,
+        radius: 0.05,
+        distance: 1
+      },
+      kitchen: {
+        pitch: 32,
+        yaw: -41,
+        radius: 0.045,
+        distance: 1
+      },
+	  landing: {
+        pitch: 32,
+        yaw: -46,
+        radius: 0.04,
+        distance: 1
+      }
+    }
+  },
+  livingRoom: {
+    image: 'https://s3-ap-southeast-2.amazonaws.com/vr-media-storage/stereo360.jpg',
+	isStereo: true,
+    hotspots: {
+      diningRoom: {
+        pitch: 32,
+        yaw: -35,
+        radius: 0.05,
+        distance: 1
+      },
+      kitchen: {
+        pitch: 32,
+        yaw: -41,
+        radius: 0.045,
+        distance: 1
+      },
+      landing: {
+        pitch: 32,
+        yaw: -46,
+        radius: 0.04,
+        distance: 1
+      }
+    }
+  },
+  kitchen: {
+    image: 'https://s3-ap-southeast-2.amazonaws.com/vr-media-storage/mono180.png',
+	isStereo: false,
+    hotspots: {
+      diningRoom: {
+        pitch: 32,
+        yaw: -35,
+        radius: 0.05,
+        distance: 1
+      },
+      livingRoom: {
+        pitch: 32,
+        yaw: -41,
+        radius: 0.045,
+        distance: 1
+      },
+      landing: {
+        pitch: 32,
+        yaw: -46,
+        radius: 0.04,
+        distance: 1
+      }
+    }
+  }
+}; 
+
+function onVrViewLoad() {
   vrView = new VRView.Player('#vrview', {
-	//image: 'https://s3-ap-southeast-2.amazonaws.com/vr-media-storage/mono180.png',
-	image: 'https://s3-ap-southeast-2.amazonaws.com/vr-media-storage/mono360.jpg',
-	//image: 'https://s3-ap-southeast-2.amazonaws.com/vr-media-storage/stereo180.png',
-	//image: 'https://s3-ap-southeast-2.amazonaws.com/vr-media-storage/stereo360.jpg',
 	
-	//preview: 'https://s3-ap-southeast-2.amazonaws.com/vr-media-storage/mono360.jpg',
-    is_stereo: false,
+	image: scenes[landingPage].image,
+    is_stereo: scenes[landingPage].isStereo,
 	width: "1000",
 	height: "500",
 	is_autopan_off: true
   });
   
   vrView.on('ready', onVRViewReady);
+  vrView.on('modechange', onModechange);
   vrView.on('click', onHotspotClick);
   vrView.on('error', onVRViewError);
+  
+  
+  
 }
 
-function onVRViewReady(e) {
+function onModechange(e) {
+console.log('onModeChange', e.mode);
+	alert("change=");
+	alert("change=" + e.mode);
+}
 
-	vrView.addHotspot('dining-room', {
-	    pitch: 32, // In degrees. Up is positive.
-		yaw: -35, // In degrees. To the right is positive.
-		radius: 0.05, // Radius of the circular target in meters.
-		distance: 1 // Distance of target from camera in meters.
-  });
-  
-  vrView.addHotspot('living-room', {
-		pitch: 32, // In degrees. Up is positive.
-		yaw: -41, // In degrees. To the right is positive.
-		radius: 0.045, // Radius of the circular target in meters.
-		distance: 1 // Distance of target from camera in meters.
-  });
-  
-    vrView.addHotspot('kitchen', {
-		pitch: 32, // In degrees. Up is positive.
-		yaw: -46, // In degrees. To the right is positive.
-		radius: 0.04, // Radius of the circular target in meters.
-		distance: 1 // Distance of target from camera in meters.
-  });
+
+function onVRViewReady(e) {
+	loadHotspot('landing');
 }
 
 function onHotspotClick(e) {
-  alert("id="+ e.id);
-  //console.log('onHotspotClick', e.id);
-  if (e.id) {
-    loadScene(e.id);
-  }
+alert("onHotspotClick::" + e.id);
+	if (e.id != undefined && e.id != '' && e.id != null) {
+		loadScene(e.id);
+		loadHotspot(e.id);
+	}
+		
 }
+
+function loadScene(id) {
+  alert("loadScene::" + id);
+
+  vrView.setContent({
+    image: scenes[id].image,
+    is_stereo: scenes[id].isStereo,
+	is_autopan_off: true
+  });
+}
+
+function loadHotspot(id) {
+  // Add all the hotspots for the scene
+  var newScene = scenes[id];
+  
+  var sceneHotspots = Object.keys(newScene.hotspots);
+  //alert("sceneHotspots::" + sceneHotspots);
+  
+  for (var i = 0; i < sceneHotspots.length; i++) {
+    var hotspotKey = sceneHotspots[i];
+	//alert("hotspotKey::" + hotspotKey);
+    var hotspot = newScene.hotspots[hotspotKey];
+
+    vrView.addHotspot(hotspotKey, {
+      pitch: hotspot.pitch,
+      yaw: hotspot.yaw,
+      radius: hotspot.radius,
+      distance: hotspot.distance
+    });
+  }
+} 
 
 function onVRViewError(e) {
   console.log('Error! %s', e.message);
 }
-
-
 </script> 
 
 <title>VR Application</title>
