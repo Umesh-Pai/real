@@ -23,19 +23,20 @@ public class GetMetadata implements RequestHandler<APIGatewayProxyRequestEvent, 
     	context.getLogger().log("projectId: " + gatewayEvent.getPathParameters().get("projectId"));
         context.getLogger().log("Method: " + gatewayEvent.getHttpMethod());
         context.getLogger().log("Path: " + gatewayEvent.getPath());
-        //context.getLogger().log("Content: " + gatewayEvent.getHeaders().get("Content-Type"));
         ApiGatewayProxyResponse response = null;
+        String projectId = null;
+        String metadata = null;
     	
         try {
-        	JSONObject body = new JSONObject();
+        	projectId = gatewayEvent.getPathParameters().get("projectId");
         	
-        	getMetadata();
+        	metadata = getMetadata(projectId);
+        	System.out.println("metadata resp:" + metadata);
         	
         	Map<String, String> headers = new HashMap();
             headers.put("Content-Type", "application/json");
             
-        	response = new ApiGatewayProxyResponse(200, headers, body.toString());
-        	
+        	response = new ApiGatewayProxyResponse(200, headers, metadata);
             
         } catch (Exception e) {
             e.printStackTrace();
@@ -46,14 +47,19 @@ public class GetMetadata implements RequestHandler<APIGatewayProxyRequestEvent, 
         return response;
 	}
 
-    private String getMetadata() {
+    private String getMetadata(String projectId) {
     	String metadata = null;
     	String tableName = "Projects";
-		String projectId = "2468";
+    	String primaryColumn = "ProjectID";
+    	JSONObject response = new JSONObject();
 		
-		System.out.println("In getMetadata");
+		System.out.println("In getMetadata projectId::" + projectId);
+		
+		AttributeValue attValue = new AttributeValue();
+		attValue.setN(projectId);
+		
 		HashMap<String,AttributeValue> primaryKey = new HashMap<String,AttributeValue>();
-		primaryKey.put("ProjectID", new AttributeValue(projectId));
+		primaryKey.put(primaryColumn, attValue);
 		
 		GetItemRequest request = new GetItemRequest().withKey(primaryKey).withTableName(tableName);
 
@@ -61,19 +67,29 @@ public class GetMetadata implements RequestHandler<APIGatewayProxyRequestEvent, 
 		
 		try {
 			Map<String,AttributeValue> item = ddb.getItem(request).getItem();
-			System.out.println("size::" + item.size());
+			
 			if (item != null) {
-                Set<String> keys = item.keySet();
-                for (String key : keys) {
-                    System.out.format("Key::", key + " Value::" + item.get(key).toString());
-                }
+				if (item.containsKey("MetaData")) {
+					metadata = item.get("MetaData").getS();
+					System.out.println("MetaData::" + metadata);
+					response.put("MetaData", metadata);
+				}
+				else {
+					System.out.println("metadata is null");
+					response.put("Error", "Metadata doesn't exist for Project Id " + projectId);
+				}
             }
+			else {
+				System.out.println("item is null");
+				response.put("Error", "Project Id doesn't exist");
+			}
 			
 		} catch (Exception e) {
+			System.out.println("Error");
+			response.put("Error", "Server Failure");
 			e.printStackTrace();
-            System.err.println(e.getMessage());
         }
     	
-    	return metadata;
+    	return response.toString();
     }
 }
