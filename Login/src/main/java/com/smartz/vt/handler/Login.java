@@ -66,7 +66,7 @@ public class Login implements RequestHandler<APIGatewayProxyRequestEvent, ApiGat
 			password = credentialsJson.getString("password");
 			
 			AttributeValue attValue = new AttributeValue();
-			attValue.setN(userId);
+			attValue.setS(userId);
 			
 			HashMap<String,AttributeValue> primaryKey = new HashMap<String,AttributeValue>();
 			primaryKey.put(primaryColumn, attValue);
@@ -78,11 +78,13 @@ public class Login implements RequestHandler<APIGatewayProxyRequestEvent, ApiGat
 			Map<String,AttributeValue> item = ddb.getItem(request).getItem();
 			
 			if (item != null) {
+				System.out.println("item::" + item.toString());
 				if (item.containsKey("Password")) {
 					passwordinDB = item.get("Password").getS();
 					System.out.println("Password::" + passwordinDB);
 					
 					if (passwordinDB.equals(password)) {
+						System.out.println("Success::");
 						response.put("Status", "Success");
 					} else {
 						System.out.println("wrong password");
@@ -99,8 +101,6 @@ public class Login implements RequestHandler<APIGatewayProxyRequestEvent, ApiGat
 				System.out.println("item is null");
 				response.put("Error", "Invalid User Id or Password");
 			}
-			
-			
 		} catch (ResourceNotFoundException e) {
 			System.out.println("Wrong table name");
 			response.put("Error", "Server Failure");
