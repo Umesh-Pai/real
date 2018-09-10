@@ -17,18 +17,7 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
-import com.amazonaws.services.dynamodbv2.document.DynamoDB;
-import com.amazonaws.services.dynamodbv2.document.Table;
-import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
-import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
-import com.amazonaws.services.dynamodbv2.model.ComparisonOperator;
-import com.amazonaws.services.dynamodbv2.model.ConditionalOperator;
-import com.amazonaws.services.dynamodbv2.document.Item;
-import com.amazonaws.services.dynamodbv2.document.ItemCollection;
-import com.amazonaws.services.dynamodbv2.document.QueryFilter;
-import com.amazonaws.services.dynamodbv2.document.QueryOutcome;
-import java.util.Iterator;
 
 public class GetProjectList implements RequestHandler<APIGatewayProxyRequestEvent, ApiGatewayProxyResponse> {
 
@@ -67,8 +56,9 @@ public class GetProjectList implements RequestHandler<APIGatewayProxyRequestEven
     	JSONObject projectJson = null;
     	JSONArray projectList = new JSONArray();
     	JSONObject response = new JSONObject();
+    	JSONObject errMesg = new JSONObject();
     	String data = null;
-    	int status = 200;
+    	int status = 500;
 
 		final AmazonDynamoDB ddb = AmazonDynamoDBClientBuilder.defaultClient();
 		
@@ -76,7 +66,8 @@ public class GetProjectList implements RequestHandler<APIGatewayProxyRequestEven
 			System.out.println("useId==" + userId);
 			
 			if (userId == null || userId.equals("")) {
-				data = "Invalid Request";
+				errMesg.put("errorMesg", "Invalid Request");
+				data = errMesg.toString();
 				status = 400;
 			} 
 			else {
@@ -109,9 +100,9 @@ public class GetProjectList implements RequestHandler<APIGatewayProxyRequestEven
 			}
 			
 		} catch (Exception e) {
-			System.out.println("Error");
 			e.printStackTrace();
-			data = "Server Failure";
+			errMesg.put("errorMesg", "Server Failure");
+			data = errMesg.toString();
 			status = 500;
         }
 		
