@@ -21,23 +21,24 @@ public class Login implements RequestHandler<APIGatewayProxyRequestEvent, ApiGat
     public Login() {}
     
     public ApiGatewayProxyResponse handleRequest(APIGatewayProxyRequestEvent gatewayEvent, Context context) {
-        context.getLogger().log("Method: " + gatewayEvent.getHttpMethod());
         context.getLogger().log("Body: " + gatewayEvent.getBody());
         
         ApiGatewayProxyResponse response = null;
 		String resp = null;
 		String userCredentials = null;
+		JSONObject responseJson = null;
 		
         try {
         	userCredentials = gatewayEvent.getBody();
         	
         	resp = loginUser(userCredentials);
         	System.out.println("login resp:" + resp);
+			responseJson = new JSONObject(resp);
         	
         	Map<String, String> headers = new HashMap();
             headers.put("Content-Type", "application/json");
             
-        	response = new ApiGatewayProxyResponse(200, headers, resp);
+			response = new ApiGatewayProxyResponse(responseJson.getInt("status"), headers, responseJson.getString("data"));
             
         } catch (Exception e) {
             e.printStackTrace();
@@ -55,60 +56,85 @@ public class Login implements RequestHandler<APIGatewayProxyRequestEvent, ApiGat
     	String userId = null;
     	String password = null;
     	String passwordinDB = null;
+    	
+    	JSONObject errMesg = new JSONObject();
+    	String data = null;
+    	int status = 500;
 		
 		System.out.println("In loginUser userCredentials::" + userCredentials);
 
 		try {
 			
-			credentialsJson = new JSONObject(userCredentials);
-			System.out.println("credentialsJson::" + credentialsJson);
-			userId = credentialsJson.getString("userId");
-			password = credentialsJson.getString("password");
-			
-			AttributeValue attValue = new AttributeValue();
-			attValue.setS(userId);
-			
-			HashMap<String,AttributeValue> primaryKey = new HashMap<String,AttributeValue>();
-			primaryKey.put(primaryColumn, attValue);
-			
-			GetItemRequest request = new GetItemRequest().withKey(primaryKey).withTableName(tableName).withProjectionExpression(projection);
-
-			final AmazonDynamoDB ddb = AmazonDynamoDBClientBuilder.defaultClient();
-			
-			Map<String,AttributeValue> item = ddb.getItem(request).getItem();
-			
-			if (item != null) {
-				System.out.println("item::" + item.toString());
-				if (item.containsKey("Password")) {
-					passwordinDB = item.get("Password").getS();
-					System.out.println("Password::" + passwordinDB);
-					
-					if (passwordinDB.equals(password)) {
-						System.out.println("Success::");
-						response.put("Status", "Success");
-					} else {
-						System.out.println("wrong password");
-						response.put("Error", "Invalid User Id or Password");
-					}
-					
-				}
-				else {
-					System.out.println("password is null");
-					response.put("Error", "Invalid User Id or Password");
-				}
-            }
+			if (userCredentials == null || userCredentials.equals("")) {
+				errMesg.put("errorMesg", "Invalid Request");
+				data = errMesg.toString();
+				status = 400;
+			} 
 			else {
-				System.out.println("item is null");
-				response.put("Error", "Invalid User Id or Password");
+				credentialsJson = new JSONObject(userCredentials);
+				System.out.println("credentialsJson::" + credentialsJson);
+				userId = credentialsJson.getString("userId");
+				password = credentialsJson.getString("password");
+				
+				AttributeValue attValue = new AttributeValue();
+				attValue.setS(userId);
+				
+				HashMap<String,AttributeValue> primaryKey = new HashMap<String,AttributeValue>();
+				primaryKey.put(primaryColumn, attValue);
+				
+				GetItemRequest request = new GetItemRequest().withKey(primaryKey).withTableName(tableName).withProjectionExpression(projection);
+				final AmazonDynamoDB ddb = AmazonDynamoDBClientBuilder.defaultClient();
+				Map<String,AttributeValue> item = ddb.getItem(request).getItem();
+				
+				if (item != null) {
+					System.out.println("item::" + item.toString());
+					if (item.containsKey("Password")) {
+						passwordinDB = item.get("Password").getS();
+						System.out.println("Password::" + passwordinDB);
+						
+						if (passwordinDB.equals(password)) {
+							System.out.println("Success::");
+							data = new JSONObject().put("message", "success").toString();
+							status = 200;
+						} else {
+							System.out.println("wrong password");
+							//response.put("Error", "Invalid User Id or Password");
+							errMesg.put("errorMesg", "Invalid User Id or Password");
+							data = errMesg.toString();
+							status = 401;
+						}
+					}
+					else {
+						System.out.println("password is null");
+						errMesg.put("errorMesg", "Invalid User Id or Password");
+						data = errMesg.toString();
+						status = 401;
+					}
+	            }
+				else {
+					System.out.println("item is null");
+					errMesg.put("errorMesg", "Invalid User Id or Password");
+					data = errMesg.toString();
+					status = 401;
+				}
 			}
+			
 		} catch (ResourceNotFoundException e) {
 			System.out.println("Wrong table name");
-			response.put("Error", "Server Failure");
+			//response.put("Error", "Server Failure");
+			errMesg.put("errorMesg", "Invalid User Id or Password");
+			data = errMesg.toString();
+			status = 401;
         } catch (AmazonServiceException e) {
         	System.out.println("Unexpected Error");
-			response.put("Error", "Server Failure");
+			//response.put("Error", "Server Failure");
+        	errMesg.put("errorMesg", "Server Failure");
+			data = errMesg.toString();
+			status = 500;
         }
     	
-    	return response.toString(); 
+		response.put("status", status);
+		response.put("data", data);
+    	return response.toString();
     }
 }

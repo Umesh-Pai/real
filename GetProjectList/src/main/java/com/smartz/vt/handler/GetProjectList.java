@@ -45,9 +45,6 @@ public class GetProjectList implements RequestHandler<APIGatewayProxyRequestEven
             
         } catch (Exception e) {
             e.printStackTrace();
-            //context.getLogger().log(String.format(
-              //  "Error getting object %s from bucket %s. Make sure they exist and"));
-            //throw e;
         }
         return response;
 	}

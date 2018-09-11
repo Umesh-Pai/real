@@ -4,12 +4,9 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.smartz.vt.domain.ApiGatewayProxyResponse;
-
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONObject;
-import java.util.Set;
-
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
@@ -21,75 +18,94 @@ public class GetMetadata implements RequestHandler<APIGatewayProxyRequestEvent, 
     
     public ApiGatewayProxyResponse handleRequest(APIGatewayProxyRequestEvent gatewayEvent, Context context) {
     	context.getLogger().log("projectId: " + gatewayEvent.getPathParameters().get("projectId"));
-        context.getLogger().log("Method: " + gatewayEvent.getHttpMethod());
-        context.getLogger().log("Path: " + gatewayEvent.getPath());
         ApiGatewayProxyResponse response = null;
         String projectId = null;
         String metadata = null;
+        JSONObject responseJson = null;
     	
         try {
         	projectId = gatewayEvent.getPathParameters().get("projectId");
         	
         	metadata = getMetadata(projectId);
         	System.out.println("metadata resp:" + metadata);
+        	responseJson = new JSONObject(metadata);
         	
         	Map<String, String> headers = new HashMap();
             headers.put("Content-Type", "application/json");
             
-        	response = new ApiGatewayProxyResponse(200, headers, metadata);
-            
+        	response = new ApiGatewayProxyResponse(responseJson.getInt("status"), headers, responseJson.getString("data"));
+
         } catch (Exception e) {
             e.printStackTrace();
-            //context.getLogger().log(String.format(
-              //  "Error getting object %s from bucket %s. Make sure they exist and"));
-            //throw e;
         }
         return response;
 	}
 
     private String getMetadata(String projectId) {
-    	String metadata = null;
+    	JSONObject metadata = new JSONObject();
     	String tableName = "Projects";
     	String primaryColumn = "ProjectID";
     	JSONObject response = new JSONObject();
+    	JSONObject errMesg = new JSONObject();
+    	String data = null;
+    	int status = 500;
 		
 		System.out.println("In getMetadata projectId::" + projectId);
 		
-		AttributeValue attValue = new AttributeValue();
-		attValue.setN(projectId);
-		
-		HashMap<String,AttributeValue> primaryKey = new HashMap<String,AttributeValue>();
-		primaryKey.put(primaryColumn, attValue);
-		
-		GetItemRequest request = new GetItemRequest().withKey(primaryKey).withTableName(tableName);
-
-		final AmazonDynamoDB ddb = AmazonDynamoDBClientBuilder.defaultClient();
-		
 		try {
-			Map<String,AttributeValue> item = ddb.getItem(request).getItem();
 			
-			if (item != null) {
-				if (item.containsKey("MetaData")) {
-					metadata = item.get("MetaData").getS();
-					System.out.println("MetaData::" + metadata);
-					response.put("MetaData", metadata);
-				}
-				else {
-					System.out.println("metadata is null");
-					response.put("Error", "Metadata doesn't exist for Project Id " + projectId);
-				}
-            }
+			if (projectId == null || projectId.equals("")) {
+				errMesg.put("errorMesg", "Invalid Request");
+				data = errMesg.toString();
+				status = 400;
+			} 
 			else {
-				System.out.println("item is null");
-				response.put("Error", "Project Id doesn't exist");
+				AttributeValue attValue = new AttributeValue();
+				attValue.setN(projectId);
+				
+				HashMap<String,AttributeValue> primaryKey = new HashMap<String,AttributeValue>();
+				primaryKey.put(primaryColumn, attValue);
+				
+				GetItemRequest request = new GetItemRequest().withKey(primaryKey).withTableName(tableName);
+
+				final AmazonDynamoDB ddb = AmazonDynamoDBClientBuilder.defaultClient();
+				Map<String,AttributeValue> item = ddb.getItem(request).getItem();
+				
+				if (item != null) {
+					if (item.containsKey("MetaData")) {
+						
+						metadata.put("metadata", item.get("MetaData").getS());
+						//data = item.get("MetaData").getS();
+						//response.put("MetaData", metadata);
+						data = metadata.toString();
+						System.out.println("MetaData::" + data);
+						status = 200;
+					}
+					else {
+						System.out.println("metadata is null");
+						errMesg.put("errorMesg", "Metadata doesn't exist for Project Id " + projectId);
+						data = errMesg.toString();
+						status = 400;
+					}
+	            }
+				else {
+					System.out.println("item is null");
+					errMesg.put("errorMesg", "Project Id doesn't exist");
+					data = errMesg.toString();
+					status = 400;
+				}
 			}
 			
 		} catch (Exception e) {
 			System.out.println("Error");
-			response.put("Error", "Server Failure");
 			e.printStackTrace();
+			errMesg.put("errorMesg", "Server Failure");
+			data = errMesg.toString();
+			status = 500;
         }
     	
+		response.put("status", status);
+		response.put("data", data);
     	return response.toString();
     }
 }
