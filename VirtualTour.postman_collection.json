@@ -1,0 +1,166 @@
+{
+	"owner": "288125",
+	"lastUpdatedBy": "288125",
+	"lastRevision": 4722331034,
+	"team": null,
+	"id": "0ffc6a90-2062-fb6b-2f2d-c1871a568d48",
+	"name": "VirtualTour",
+	"description": "",
+	"variables": null,
+	"auth": null,
+	"events": null,
+	"folders_order": [],
+	"order": [
+		"38f39c85-0368-4f53-5cf2-fd11ed196284",
+		"2f378bac-3d73-89ec-27eb-c37e4139e39e",
+		"5716139d-3907-77fd-205b-6738951928e0",
+		"d90ddc4e-b5af-568b-78d3-e559278fc1f0",
+		"66daaf48-687e-2122-020d-85fab5a90258"
+	],
+	"folders": [],
+	"hasRequests": true,
+	"requests": [
+		{
+			"id": "2f378bac-3d73-89ec-27eb-c37e4139e39e",
+			"headers": "",
+			"headerData": [],
+			"url": "https://swza6j9cq0.execute-api.ap-southeast-2.amazonaws.com/dev/virtualtour/projects/1234/metadata",
+			"folder": null,
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "GET",
+			"data": null,
+			"dataMode": "params",
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1536644415621,
+			"name": "Get Metadata",
+			"description": null,
+			"collectionId": "0ffc6a90-2062-fb6b-2f2d-c1871a568d48",
+			"responses": []
+		},
+		{
+			"id": "38f39c85-0368-4f53-5cf2-fd11ed196284",
+			"headers": "Content-Type: application/json\n",
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json",
+					"description": "",
+					"enabled": true
+				}
+			],
+			"url": "https://swza6j9cq0.execute-api.ap-southeast-2.amazonaws.com/dev/virtualtour/register",
+			"folder": null,
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "POST",
+			"data": [],
+			"dataMode": "raw",
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1536642654916,
+			"name": "Register",
+			"description": null,
+			"collectionId": "0ffc6a90-2062-fb6b-2f2d-c1871a568d48",
+			"responses": [],
+			"rawModeData": "{\t\r\n\t\"userId\" : \"Martin666\",\r\n\t\"password\" : \"Craig\",\r\n\t\"firstName\" : \"Peter\",\r\n\t\"lastName\" : \"Craig\",\r\n\t\"organization\" : \"Woodards\"\r\n}"
+		},
+		{
+			"id": "5716139d-3907-77fd-205b-6738951928e0",
+			"headers": "",
+			"headerData": [],
+			"url": " https://swza6j9cq0.execute-api.ap-southeast-2.amazonaws.com/dev/virtualtour/projects?userId=John1234",
+			"folder": null,
+			"queryParams": [
+				{
+					"key": "userId",
+					"value": "John1234",
+					"equals": true,
+					"description": "",
+					"enabled": true
+				}
+			],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "GET",
+			"data": null,
+			"dataMode": "params",
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1536519271663,
+			"name": "Get Projects for UserId",
+			"description": null,
+			"collectionId": "0ffc6a90-2062-fb6b-2f2d-c1871a568d48",
+			"responses": []
+		},
+		{
+			"id": "66daaf48-687e-2122-020d-85fab5a90258",
+			"headers": "Content-Type: application/json\n",
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json",
+					"description": "",
+					"enabled": true
+				}
+			],
+			"url": "https://swza6j9cq0.execute-api.ap-southeast-2.amazonaws.com/dev/virtualtour/projects",
+			"folder": null,
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "POST",
+			"data": [],
+			"dataMode": "raw",
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1536639090965,
+			"name": "Create Project",
+			"description": null,
+			"collectionId": "0ffc6a90-2062-fb6b-2f2d-c1871a568d48",
+			"responses": [],
+			"rawModeData": "{\t\r\n\t\"projectId\" : 1004,\r\n\t\"projectName\" : \"11 shepparton Rd, Richmond\",\r\n\t\"metaData\" : \"{Project-Meta-Data}\",\r\n\t\"userId\" : \"Peter987\"\r\n}"
+		},
+		{
+			"id": "d90ddc4e-b5af-568b-78d3-e559278fc1f0",
+			"headers": "Content-Type: application/json\n",
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json",
+					"description": "",
+					"enabled": true
+				}
+			],
+			"url": "https://swza6j9cq0.execute-api.ap-southeast-2.amazonaws.com/dev/virtualtour/login",
+			"folder": null,
+			"queryParams": [],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "POST",
+			"data": [],
+			"dataMode": "raw",
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1536641954315,
+			"name": "Login",
+			"description": null,
+			"collectionId": "0ffc6a90-2062-fb6b-2f2d-c1871a568d48",
+			"responses": [],
+			"rawModeData": "{\t\r\n\t\"userId\" : \"Peter987\",\r\n\t\"password\" : \"Craig123\"\r\n}"
+		}
+	]
+}
