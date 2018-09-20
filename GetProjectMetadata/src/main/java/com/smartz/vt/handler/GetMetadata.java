@@ -32,6 +32,8 @@ public class GetMetadata implements RequestHandler<APIGatewayProxyRequestEvent, 
         	
         	Map<String, String> headers = new HashMap();
             headers.put("Content-Type", "application/json");
+            headers.put("Access-Control-Allow-Origin", "*");
+            //headers.put("access-control-allow-origin", "*");
             
         	response = new ApiGatewayProxyResponse(responseJson.getInt("status"), headers, responseJson.getString("data"));
 
