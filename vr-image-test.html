@@ -1,0 +1,172 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+
+<script src="https://storage.googleapis.com/vrview/2.0/build/vrview.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<script type="text/javascript">
+//window.addEventListener('load', onVrViewLoad);
+window.addEventListener('load', invoke);
+var vrView;
+var landingPage = 'landing';
+
+function invoke() {
+	alert("in");
+	$.ajax({
+			url: "https://swza6j9cq0.execute-api.ap-southeast-2.amazonaws.com/dev/virtualtour/projects/1002/metadata",
+			type: "GET",
+			success: function(data) {
+			alert("data=" + JSON.stringify(data));
+				console.log("Json::" + JSON.stringify(data));
+			},
+			error: function(e) {
+				console.log("Error while fetching registration data...");
+			}
+		})
+}
+
+var metadata = {
+   "landing": {
+    "image": "https://s3-ap-southeast-2.amazonaws.com/vr-media-storage/1002/dining.jpg",
+	"isStereo": false,
+    "hotspots": {
+	  "bedRoom": {
+        "pitch": 32,
+        "yaw": -46,
+        "radius": 0.04,
+        "distance": 1
+      }
+    }
+  },
+  "bedRoom": {
+    "image": "https://s3-ap-southeast-2.amazonaws.com/vr-media-storage/1002/bedroom.jpg",
+	"isStereo": true,
+    "hotspots": {
+	  "landing": {
+        "pitch": 32,
+        "yaw": -46,
+        "radius": 0.04,
+        "distance": 1
+      }
+    }
+  }
+}
+
+//var scenes = metadata;
+alert ("scenes=" + JSON.stringify(scenes));
+
+
+
+/*
+var scenes = {
+   "landing": {
+    "image": "https://s3-ap-southeast-2.amazonaws.com/vr-media-storage/mono360.jpg",
+	"isStereo": false,
+    "hotspots": {
+	  "diningRoom": {
+        "pitch": 32,
+        "yaw": -46,
+        "radius": 0.04,
+        "distance": 1
+      }
+    }
+  },
+  "diningRoom": {
+    "image": "https://s3-ap-southeast-2.amazonaws.com/vr-media-storage/stereo180.png",
+	"isStereo": true,
+    "hotspots": {
+	  "landing": {
+        "pitch": 32,
+        "yaw": -46,
+        "radius": 0.04,
+        "distance": 1
+      }
+    }
+  }
+}; */
+
+function onVrViewLoad() {
+  vrView = new VRView.Player('#vrview', {
+	
+	image: scenes[landingPage].image,
+    is_stereo: scenes[landingPage].isStereo,
+	width: "1000",
+	height: "500",
+	is_autopan_off: true
+  });
+  
+  vrView.on('ready', onVRViewReady);
+  vrView.on('modechange', onModechange);
+  vrView.on('click', onHotspotClick);
+  vrView.on('error', onVRViewError);
+  
+}
+
+function onModechange(e) {
+console.log('onModeChange', e.mode);
+	//alert("change=");
+	//alert("change=" + e.mode);
+}
+
+
+function onVRViewReady(e) {
+	loadHotspot('landing');
+}
+
+function onHotspotClick(e) {
+//alert("onHotspotClick::" + e.id);
+	if (e.id != undefined && e.id != '' && e.id != null) {
+		loadScene(e.id);
+		loadHotspot(e.id);
+	}
+		
+}
+
+function loadScene(id) {
+  //alert("loadScene::" + id);
+
+  vrView.setContent({
+    image: scenes[id].image,
+    is_stereo: scenes[id].isStereo,
+	is_autopan_off: true
+  });
+}
+
+function loadHotspot(id) {
+  // Add all the hotspots for the scene
+  var newScene = scenes[id];
+  
+  var sceneHotspots = Object.keys(newScene.hotspots);
+  //alert("sceneHotspots::" + sceneHotspots);
+  
+  for (var i = 0; i < sceneHotspots.length; i++) {
+    var hotspotKey = sceneHotspots[i];
+	//alert("hotspotKey::" + hotspotKey);
+    var hotspot = newScene.hotspots[hotspotKey];
+
+    vrView.addHotspot(hotspotKey, {
+      pitch: hotspot.pitch,
+      yaw: hotspot.yaw,
+      radius: hotspot.radius,
+      distance: hotspot.distance
+    });
+  }
+} 
+
+function onVRViewError(e) {
+  console.log('Error! %s', e.message);
+}
+</script> 
+
+<title>VR Application Test.</title>
+</head>
+<body>
+	Start
+	
+	<div id="vrview"></div>
+	
+	End
+	
+</body>
+</html>
