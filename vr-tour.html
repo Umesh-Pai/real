@@ -1,0 +1,115 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+
+<script src="https://storage.googleapis.com/vrview/2.0/build/vrview.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<script type="text/javascript">
+window.addEventListener('load', invoke);
+var vrView;
+var landingPage = 'landing';
+var metadata;
+var scenes;
+var projectId;
+
+function invoke() {
+
+	var params = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+	for(var i = 0; i < params.length; i++) {
+	  param = params[i].split('=');	  
+	  if(param[0] == 'projectId') {
+			projectId = param[1];
+	  }
+	}
+	var endPoint = "https://swza6j9cq0.execute-api.ap-southeast-2.amazonaws.com/dev/virtualtour/projects/" + projectId + "/metadata";
+	console.log("endPoint:" + endPoint);
+	
+	$.ajax({
+			//url: "https://swza6j9cq0.execute-api.ap-southeast-2.amazonaws.com/dev/virtualtour/projects/1004/metadata",
+			url: endPoint,
+			type: "GET",
+			success: function(data) {
+				//console.log("Json::" + JSON.stringify(data));
+				
+				metadata = data.metadata;
+				scenes = JSON.parse(metadata);
+				onVrViewLoad();
+			},
+			error: function(e) {
+				console.log("Error while fetching registration data..." + JSON.stringify(e));
+			}
+		})
+}
+
+function onVrViewLoad() {
+
+  vrView = new VRView.Player('#vrview', {	
+	image: scenes.landing.image,
+    is_stereo: scenes.landing.isStereo,
+	width: "1000",
+	height: "500",
+	is_autopan_off: true
+  });
+  
+  vrView.on('ready', onVRViewReady);
+  vrView.on('modechange', onModechange);
+  vrView.on('click', onHotspotClick);
+  vrView.on('error', onVRViewError);
+  
+}
+
+function onModechange(e) {
+	console.log('onModeChange', e.mode);
+}
+
+function onVRViewReady(e) {
+	loadHotspot('landing');
+}
+
+function onHotspotClick(e) {
+	if (e.id != undefined && e.id != '' && e.id != null) {
+		loadScene(e.id);
+		loadHotspot(e.id);
+	}
+}
+
+function loadScene(id) {
+
+  vrView.setContent({
+    image: scenes[id].image,
+    is_stereo: scenes[id].isStereo,
+	is_autopan_off: true
+  });
+}
+
+function loadHotspot(id) {
+  var newScene = scenes[id];
+  var sceneHotspots = Object.keys(newScene.hotspots);
+  
+  for (var i = 0; i < sceneHotspots.length; i++) {
+    var hotspotKey = sceneHotspots[i];
+	var hotspot = newScene.hotspots[hotspotKey]
+	
+    vrView.addHotspot(hotspotKey, {
+      pitch: hotspot.pitch,
+      yaw: hotspot.yaw,
+      radius: hotspot.radius,
+      distance: hotspot.distance
+    });
+  }
+} 
+
+function onVRViewError(e) {
+  console.log('Error! %s', e.message);
+}
+</script> 
+
+<title>VR Application Test.</title>
+</head>
+<body>
+	Start
+	<div id="vrview"></div>
+	End
+</body>
+</html>
