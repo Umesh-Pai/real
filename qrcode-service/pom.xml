@@ -68,9 +68,9 @@
         		<artifactId>heroku-maven-plugin</artifactId>
         		<version>1.2.0</version>
         		<configuration>
-  					<appName>nfc-access-service</appName>
+  					<appName>vt-qrcode-service</appName>
 			          <processTypes>
-            			  <web>java $JAVA_OPTS -Dserver.port=$PORT -cp target/classes:target/dependency/* com.start.nfc.access.AccessApplication</web>
+            			  <web>java $JAVA_OPTS -Dserver.port=$PORT -cp target/classes:target/dependency/* com.smartz.vt.qrcode.QRCodeApplication</web>
         			  </processTypes>
 				</configuration>
       		</plugin>
